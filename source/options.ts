@@ -2,10 +2,7 @@
 import 'webext-base-css';
 import './options.css';
 
-// Don't forget to import this wherever you use it
-import browser from 'webextension-polyfill';
-
-import optionsStorage from './options-storage.js';
+import optionsStorage from './options-storage';
 
 async function init() {
 	await optionsStorage.syncForm('#options-form');

@@ -1,16 +1,16 @@
-import optionsStorage from './options-storage.js';
+import optionsStorage from './options-storage';
 
-/**
- * 
- * @param string apiBaseUrl 
- * @returns boolean
- */
-async function isAPIOnline(apiBaseUrl) {
+// Don't forget to import this wherever you use it
+import browser from 'webextension-polyfill';
 
-    let responce;
+import { NoteProperties } from 'joplin-api'
+
+async function isAPIOnline(apiBaseUrl: string) {
+
+    let responce: Response;
 
     try {
-        
+
         responce = await fetch(`${apiBaseUrl}/ping`, {
             method: 'GET',
             headers: {
@@ -30,25 +30,21 @@ async function isAPIOnline(apiBaseUrl) {
     return false;
 }
 
-function isNotebookAvailable(params) {
-    
-}
+function createNote(apiBaseUrl: string, token: string, content) {
 
-function createNote(api_base_url, token, content) {
-            
-        fetch(`${api_base_url}/notes?token=${encodeURIComponent(token)}`, {
-			method: 'POST',
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(content),
-		});
+    fetch(`${apiBaseUrl}/notes?token=${encodeURIComponent(token)}`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(content),
+    });
 
 }
 
 // function authJoplin(api_base_url) {
-            
+
 //     let aaa =fetch(`${api_base_url}/notes?token=${encodeURIComponent(token)}`, {
 //         method: 'POST',
 //         headers: {
@@ -61,8 +57,43 @@ function createNote(api_base_url, token, content) {
 // }
 
 function creareNoteContent(tabList, parentId) {
- 
-    let content = {}
+
+    let content: NoteProperties = {
+        parent_id: '',
+        body: '',
+        is_conflict: 0,
+        latitude: 0,
+        longitude: 0,
+        altitude: 0,
+        author: '',
+        source_url: '',
+        is_todo: 0,
+        todo_due: 0,
+        todo_completed: 0,
+        source: '',
+        source_application: '',
+        application_data: '',
+        order: 0,
+        markup_language: 0,
+        body_html: '',
+        base_url: '',
+        image_data_url: '',
+        crop_rect: {
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0
+        },
+        id: '',
+        created_time: 0,
+        updated_time: 0,
+        user_created_time: 0,
+        user_updated_time: 0,
+        title: '',
+        encryption_cipher_text: '',
+        encryption_applied: 0,
+        is_shared: 0
+    }
 
     let titleDate = new Date();
 
@@ -75,7 +106,7 @@ function creareNoteContent(tabList, parentId) {
     content.title = titleDate.toLocaleString();
     content.body = body;
 
-    if(parentId) {
+    if (parentId) {
         content.parent_id = parentId;
     }
 
@@ -85,30 +116,28 @@ function creareNoteContent(tabList, parentId) {
     }
 }
 
-browser.browserAction.onClicked.addListener(async (tab) => {
+browser.browserAction.onClicked.addListener(async () => {
 
-	const options = await optionsStorage.getAll();
+    const options = await optionsStorage.getAll();
 
     let token = options.token;
     let notebookId = options.notebook_id;
 
-    if(!token) {
+    if (!token) {
         browser.notifications.create({
             type: "basic",
             title: "Joplin Tab Stash",
             message: "Empty authentication token",
-          });
+        });
 
-          return;
+        return;
     }
 
     let tabList = await browser.tabs.query({ currentWindow: true });
 
     let noteContent = creareNoteContent(tabList, notebookId)
 
-    if(await isAPIOnline(options.joplin_api_url)) {
-
-        console.log(noteContent);
+    if (await isAPIOnline(options.joplin_api_url)) {
 
         createNote(options.joplin_api_url, token, noteContent)
 
@@ -116,20 +145,15 @@ browser.browserAction.onClicked.addListener(async (tab) => {
             type: "basic",
             title: "Joplin Tab Stash",
             message: "Window stashed",
-          });
+        });
 
     } else {
-
-        console.log("aaa");
 
         browser.notifications.create({
             type: "basic",
             title: "Joplin Tab Stash",
             message: "Cannot connect to Joplin",
-          });
-
+        });
     }
 
-// 82a3c803b0e0416388f50d1bf8eca11e
-
-  });
+});
