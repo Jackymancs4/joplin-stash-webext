@@ -1,0 +1,37 @@
+{
+	"name": "Joplin Tab Stash",
+	"version": "0.1.0",
+	"description": "Stash yout tabs as Joplin notes",
+	"homepage_url": "https://github.com/jackymancs4/joplin-tab-stash-webext",
+	"manifest_version": 2,
+	"minimum_chrome_version": "80",
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "joplin-tab-stash@jackymancs4",
+			"strict_min_version": "80.0"
+		}
+	},
+	"icons": {
+		"128": "icon.png"
+	},
+	"permissions": [
+        "<all_urls>",
+		"tabs",
+		"storage",
+		"notifications"
+	],
+	"browser_action": {
+		"browser_style": true,
+		"default_title": "Stash Window in Joplin"
+	  },
+	"options_ui": {
+		"browser_style": true,
+		"page": "options.html"
+	},
+	"background": {
+		"persistent": false,
+		"scripts": [
+			"background.js"
+		]
+	}
+}
