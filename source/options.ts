@@ -2,7 +2,7 @@
 import 'webext-base-css';
 import './options.css';
 
-import optionsStorage from './options-storage.js';
+import optionsStorage from './options-storage';
 
 async function init(): Promise<void> {
 	await optionsStorage.syncForm('#options-form');

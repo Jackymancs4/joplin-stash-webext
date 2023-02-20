@@ -15,10 +15,12 @@
 		"128": "icon.png"
 	},
 	"permissions": [
-        "<all_urls>",
 		"tabs",
 		"storage",
 		"notifications"
+	],
+	"optional_permissions": [
+		"<all_urls>"
 	],
 	"browser_action": {
 		"browser_style": true,

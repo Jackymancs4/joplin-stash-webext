@@ -31,19 +31,20 @@
 	},
 	"dependencies": {
 		"joplin-api": "^0.5.1",
-		"webext-base-css": "^1.4.0",
+		"webext-base-css": "^1.4.3",
 		"webext-options-sync": "^3.0.1",
-		"webextension-polyfill": "^0.8.0"
+		"webextension-polyfill": "^0.10.0"
 	},
 	"devDependencies": {
-		"@parcel/config-webextension": "^2.6.2",
-		"@parcel/transformer-image": "^2.6.2",
-		"@types/webextension-polyfill": "^0.9.2",
+		"@parcel/config-webextension": "^2.8.3",
+		"@parcel/transformer-image": "^2.8.3",
+		"@types/webextension-polyfill": "^0.10.0",
 		"npm-run-all": "^4.1.5",
-		"parcel": "^2.6.2",
-		"stylelint": "^14.9.1",
+		"parcel": "^2.8.3",
+		"stylelint": "^15.1.0",
 		"stylelint-config-xo": "^0.21.0",
-		"xo": "^0.50.0"
+		"typescript": "^4.9.5",
+		"xo": "^0.53.1"
 	},
 	"webExt": {
 		"sourceDir": "distribution",
