@@ -8,6 +8,8 @@ export default new OptionsSync({
 		entryTemplate: '- [ ] [{title}]({url})',
 		removeEmoji: false,
 		ignoreSpecialPages: true,
+		saveAllWindows: true,
+		closeTabsOnceSaved: false,
 	},
 	migrations: [
 		OptionsSync.migrations.removeUnused,

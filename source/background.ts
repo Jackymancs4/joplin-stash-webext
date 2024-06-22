@@ -118,8 +118,10 @@ function createNote(tabList: browser.Tabs.Tab[], parentId: string, template: str
 	// 	is_shared: 0,
 	// };
 
-	const noteTitle = (new Date()).toLocaleString();
 	let noteBody = '';
+	let firstEntryText = "";
+	let lastEntryText = "";
+	let lastWindowId = -1;
 
 	for (const tab of tabList) {
 		if (!tab.url) {
@@ -130,18 +132,31 @@ function createNote(tabList: browser.Tabs.Tab[], parentId: string, template: str
 			continue;
 		}
 
-		let noteTitle = tab.title ?? tab.url;
-		noteTitle = removeEmoji ? removeEmojiFromString(noteTitle) : noteTitle;
-		noteTitle = noteTitle.trim();
+		let entryText = tab.title ?? tab.url;
+		entryText = removeEmoji ? removeEmojiFromString(entryText) : entryText;
+		entryText = entryText.trim();
 
-		noteBody += formatEntry(noteTitle, tab.url, template);
+		if(firstEntryText == "") {
+			firstEntryText = entryText;
+		}
+
+		lastEntryText = entryText;
+
+		if(tab.windowId && lastWindowId != tab.windowId) {
+			lastWindowId = tab.windowId
+
+			if (noteBody != '') {
+				noteBody += '\n'
+			}
+
+			noteBody += formatSection(entryText, "## {title}\n")
+		}
+
+		noteBody += formatEntry(entryText, tab.url, template);
 	}
 
-	// Content.title = titleDate.toLocaleString();
-	// content.body = body;
-
 	return {
-		title: noteTitle,
+		title: formatNoteTitle(firstEntryText, "{date}"),
 		parent_id: parentId,
 		body: noteBody,
 	};
@@ -182,18 +197,48 @@ function removeEmojiFromString(text: string): string {
  * Apply the template to the tab entry. Replace placeholder {title} and {url}
  * with their respective content. Append a new line char in the end.
  *
- * @param title title of the tab
- * @param url url of the tab
+ * @param entryText title of the tab
+ * @param entryUrl url of the tab
  * @param template template to be appliest
  *
  * @returns the final row
  */
-function formatEntry(title: string, url: string, template: string): string {
+function formatEntry(entryText: string, entryUrl: string, template: string): string {
+	const now = (new Date()).toLocaleString();
 	const result = template
-		.replace('{title}', title)
-		.replace('{url}', url);
+		.replace('{title}', entryText)
+		.replace('{url}', entryUrl)
+		.replace('{date}', now);
 
 	return result + '\n';
+}
+
+/**
+ * Apply the template to the tab entry. Replace placeholder {title} and {url}
+ * with their respective content. Append a new line char in the end.
+ *
+ * @param sectionName title of the tab
+ *
+ * @returns the final row
+ */
+function formatSection(sectionName: string, template: string): string {
+	const now = (new Date()).toLocaleString();
+
+	const result = template
+		.replace('{title}', sectionName)
+		.replace('{date}', now);
+
+	return result + '\n';
+}
+
+function formatNoteTitle(noteTitle: string, template: string): string {
+	const now = (new Date()).toLocaleString();
+
+	const result = template
+		.replace('{title}', noteTitle)
+		.replace('{date}', now);
+
+	return result;
 }
 
 browser.browserAction.onClicked.addListener(async () => {
@@ -212,8 +257,16 @@ browser.browserAction.onClicked.addListener(async () => {
 		return;
 	}
 
-	// Get a list of all tabs in the current window
-	const tabList = await browser.tabs.query({currentWindow: true});
+	const tabQueryOption: browser.Tabs.QueryQueryInfoType = {};
+
+	if (!options.saveAllWindows) {
+
+		// Get a list of all tabs in the current window
+		tabQueryOption.currentWindow = true
+	}
+
+	const tabList = await browser.tabs.query(tabQueryOption);
+	const tabListIds = tabList.map((tab) => {return tab.id ?? 0});
 
 	const noteContent = createNote(tabList, options.notebookId, options.entryTemplate, options.removeEmoji, options.ignoreSpecialPages);
 
@@ -226,6 +279,9 @@ browser.browserAction.onClicked.addListener(async () => {
 				title: 'Joplin Tab Stash',
 				message: 'Window stashed',
 			});
+
+			browser.tabs.remove(tabListIds)
+
 		} else {
 			browser.notifications.create({
 				type: 'basic',
